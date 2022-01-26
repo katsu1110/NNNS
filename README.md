@@ -2,7 +2,7 @@
 このレポジトリはNNNS (Numerai Neural Network Studies)という、neural networkを使って[Numerai Tournament](https://numer.ai/tournament)で勝ちたい人たちの勉強会（モブプロ会）の資料を置いておく場所です。
 
 ## NNNSの目的
-NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍できる余地は十二分にあるように思えます。しかし、NNのNumeraiのようなテーブルデータにおける利用のベストプラクティスはまだまだないのが現状です。そのため、最新の技術を含めNNについて学びどんどん実装をしていくことで、Numerai Tournamentで勝てるNNを見つけていくことが本勉強会の狙いです。
+NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍できる余地は十二分にあるように思えます。しかし、NNのNumeraiのようなテーブルデータにおける利用のベストプラクティスはまだまだないのが現状です。そのため、最新の技術を含めNNについて学びどんどん実装をしていくことで、Numerai Tournamentで勝てるNNを見つけていくことが本勉強会の狙いです。超えるぞ[XGB](https://xgboost.readthedocs.io/en/stable/)！
 
 ### 実際にやること
 週１（？）1時間くらいでオンライン開催。モブプロ形式（５名程度参加？）で実装を行う？
@@ -19,11 +19,14 @@ Numerai Tournament旧データ（target nomi）
 ### Validation Strategy
 使用データの```data_type```に準ずる (要はtime-series split)
 
+### 評価指標
+Sharpe ratio
+
 ### 特徴量エンジニアリング
 しない（あくまでNN力を高める目的のため）
 
 ### NN Framework
-tf.kerasを予定（pytorchわからんので教えてくれる人いたらpytorchでも）
+[keras](https://keras.io/)を予定（[pytorch](https://pytorch.org/)わからんので教えてくれる人いたらpytorchでも）
 
 ## Agenda
 - Baseline model (simple MLP)
