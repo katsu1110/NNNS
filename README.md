@@ -2,19 +2,18 @@
 このレポジトリはNNNS (Numerai Neural Network Studies)という、neural networkを使って[Numerai Tournament](https://numer.ai/tournament)で勝ちたい人たちの勉強会（モブプロ会）の資料を置いておく場所です。
 
 ## NNNSの目的
-NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍できる余地は十二分にあるように思えます。しかし、NNのNumeraiのようなテーブルデータにおける利用のベストプラクティスはまだまだないのが現状です。そのため、最新の技術を含めNNについて学びどんどん実装をしていくことで、Numerai Tournamentで勝てるNNを見つけていくことが本勉強会の狙いです。超えるぞ[XGB](https://xgboost.readthedocs.io/en/stable/)！
+NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍できる余地は十二分にあるように思えます。しかし、NNのNumeraiのようなテーブルデータにおける利用のベストプラクティスはまだまだないのが現状です。そのため、最新の技術を含めNNについて学びどんどん実装をしていくことで、Numerai Tournamentで勝てるNNを見つけていくことが本勉強会の狙いです。超えるぞ[XGB](https://www.kaggle.com/code1110/numerai-xgb-baseline)！
 
 ### 実際にやること
 週１（？）1時間くらいでオンライン開催。モブプロ形式（５名程度参加？）で実装を行う？
 
 ### 計算環境
-Google colab or kaggle notebookを予定
+Google colab or [kaggle notebook](https://www.kaggle.com/code)を予定
 
 ### 使用データ
-Numerai Tournament旧データ（target nomi）
+Numerai Tournament旧データ（target nomi）: 期間を固定するため更新されないものを使う
 
-- train data : 'https://numerai-public-datasets.s3-us-west-2.amazonaws.com/latest_numerai_training_data.csv.xz'
-- validation data : 'https://numerai-public-datasets.s3-us-west-2.amazonaws.com/latest_numerai_tournament_data.csv.xz'
+- [[Numerai] train & validation with kazutsugi & nomi](https://www.kaggle.com/code1110/numerai-train-validation-with-kazutsugi-nomi)
 
 ### Validation Strategy
 使用データの```data_type```に準ずる (要はtime-series split)
@@ -35,7 +34,7 @@ Sharpe ratio
 - [Activation function](https://www.tensorflow.org/api_docs/python/tf/keras/activations)
 - [Optimizer](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers)
 - Learning rate scheduler (reducelronplateau, cosine annealing)
-- Loss function (MSE, BCE, crossentropy, weighted kappa)
+- Loss function (MSE, BCE, crossentropy, weighted kappa, corr)
 - [Wide & Deep](https://keras.io/examples/structured_data/wide_deep_cross_networks/)
 - [Deep & Cross](https://keras.io/examples/structured_data/wide_deep_cross_networks/)
 - [Gated residual and variable selection network](https://keras.io/examples/structured_data/classification_with_grn_and_vsn/)
