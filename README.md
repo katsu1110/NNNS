@@ -7,11 +7,15 @@ NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍
 ### 実際にやること
 週１（？）1時間くらいでオンライン開催。モブプロ形式（５名程度参加？）で実装を行う？
 
+- 画面共有 --> Google Meets (会直前にリンク共有)
+- モブプロ --> VScode Live Share (Google Meets内でリンク共有)
+
 ### 計算環境
 Google colab or [kaggle notebook](https://www.kaggle.com/code)を予定
+--> GCP GPU instance? Notebookいるか？Git管理する
 
 ### 使用データ
-Numerai Tournament旧データ（target nomi）: 期間を固定するため更新されないものを使う
+Numerai Tournament Legacy Data
 
 - [[Numerai] train & validation with kazutsugi & nomi](https://www.kaggle.com/code1110/numerai-train-validation-with-kazutsugi-nomi)
 
@@ -19,7 +23,7 @@ Numerai Tournament旧データ（target nomi）: 期間を固定するため更�
 使用データの```data_type```に準ずる (要はtime-series split)
 
 ### 評価指標
-Sharpe ratio
+Sharpe ratio...Numerai Diagnostics toolを使った方がいいかも
 
 ### 特徴量エンジニアリング
 しない（あくまでNN力を高める目的のため）
@@ -41,8 +45,9 @@ Sharpe ratio
 - [Neural decision forest](https://keras.io/examples/structured_data/deep_neural_decision_forests/)
 - [Tabnet](https://github.com/dreamquark-ai/tabnet)
 - [TabTransformer](https://keras.io/examples/structured_data/tabtransformer/)
-- [Use Auto Encoder](https://www.kaggle.com/aimind/bottleneck-encoder-mlp-keras-tuner-8601c5)
+- [Denoising Auto Encoder](https://www.kaggle.com/aimind/bottleneck-encoder-mlp-keras-tuner-8601c5)
 - [1DCNN](https://www.kaggle.com/c/lish-moa/discussion/202256)
+- [evojax](https://github.com/google/evojax)
 
 and more...
 
