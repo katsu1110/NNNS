@@ -1,4 +1,4 @@
-![GitHub Dark](https://ibb.co/X7dWvL3)
+![GitHub Dark](https://i.ibb.co/sKDgMR6/2022-03-06-19-28-47.png)
 
 # NNNS
 このレポジトリはNNNS (Numerai Neural Network Studies)という、neural networkを使って[Numerai Tournament](https://numer.ai/tournament)で勝ちたい人たちの勉強会（モブプロ会）の資料を置いておく場所です。
