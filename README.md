@@ -1,3 +1,5 @@
+![GitHub Dark](https://ibb.co/X7dWvL3)
+
 # NNNS
 このレポジトリはNNNS (Numerai Neural Network Studies)という、neural networkを使って[Numerai Tournament](https://numer.ai/tournament)で勝ちたい人たちの勉強会（モブプロ会）の資料を置いておく場所です。
 
@@ -11,13 +13,12 @@ NumeraiはいまだKaggleのようにNN無双になっておらず、NNが活躍
 - モブプロ --> VScode Live Share (Google Meets内でリンク共有)
 
 ### 計算環境
-Google colab or [kaggle notebook](https://www.kaggle.com/code)を予定
---> GCP GPU instance? Notebookいるか？Git管理する
+[GCP Deep Learning VM Image](https://cloud.google.com/deep-learning-vm)を使う予定。Notebookいるか？ このリポジトリでそのままコードをGit管理する
 
 ### 使用データ
 Numerai Tournament Legacy Data
 
-- [[Numerai] train & validation with kazutsugi & nomi](https://www.kaggle.com/code1110/numerai-train-validation-with-kazutsugi-nomi)
+https://numer.ai/tournament
 
 ### Validation Strategy
 使用データの```data_type```に準ずる (要はtime-series split)
