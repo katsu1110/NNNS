@@ -9,6 +9,7 @@ import gc
 import pathlib
 import datetime
 import pytz
+import joblib
 from typing import List, NoReturn, Union, Tuple, Optional, Text, Generic, Callable, Dict
 from sklearn import preprocessing, metrics
 
@@ -27,15 +28,14 @@ EXPERIMENT_NAME = 'XGB_baseline'
 SLOT_NAME = 'KATSU_MINAMISAWAK'
 EXAMPLE_COL = None
 cwd = os.getcwd()
-parent_dir = os.path.dirname(cwd)
-INPUT_PATH = f'{parent_dir}/input'
-OUTPUT_PATH = f'{parent_dir}/output'
+INPUT_PATH = f'{cwd}/input'
+OUTPUT_PATH = f'{cwd}/output'
 
 # authentification
 from dotenv import load_dotenv
-load_dotenv()
-NUMERAI_KEY = os.getenv('PUBLIC_ID')
-NUMERAI_SECRET = os.getenv('SECRET_KEY')
+load_dotenv(pathlib.Path(f'{cwd}/.env'))
+NUMERAI_KEY = os.getenv('NUMERAI_KEY')
+NUMERAI_SECRET = os.getenv('NUMERAI_SECRET')
 
 # ----------------------------
 # modeling
@@ -51,7 +51,7 @@ def get_features_target(df):
     """Get feature name list and target name
     """
     features = df.columns[df.columns.str.startswith('feature')].values.tolist()
-    target = df.columns[df.columns.str.startswith('feature')].values.tolist()[0]
+    target = df.columns[df.columns.str.startswith('target')].values.tolist()[0]
     return features, target
 
 # ================== EDIT START ================== 
@@ -66,7 +66,7 @@ def model_dispatcher():
         'max_depth': 5,
         'seed': 0,
         'n_estimators': 2000,
-        'tree_method': 'gpu_hist' # Let's use GPU for a faster experiment
+        # 'tree_method': 'gpu_hist' # Let's use GPU for a faster experiment
     }
     model = xgb.XGBRegressor(**params)
     return model
@@ -96,7 +96,7 @@ def fit_model(model,
         model.fit(
             train_set['X'], train_set['y'], 
             eval_set=[(valid_set['X'], valid_set['y'])],
-            early_stopping_rounds=100, 
+            early_stopping_rounds=10, 
             verbose=100
             )
     
@@ -117,6 +117,9 @@ def inference(model, tournament, features, pred_col='prediction'):
 # run
 # ----------------------------
 def main():
+    # make output folder
+    os.makedirs(os.path.join(OUTPUT_PATH, EXPERIMENT_NAME), exist_ok=True)
+    
     # initialize logger
     today = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
     logger = init_logger(
@@ -146,7 +149,7 @@ def main():
         )
 
     # inference
-    tournament = inference(model, tournament)
+    tournament = inference(model, tournament, features)
 
     # compute validation score
     val_df = validation_metrics(
@@ -157,7 +160,7 @@ def main():
         )
 
     # save validation score
-    val_df.to_csv(os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'val_score.csv')), index=False)
+    val_df.to_csv(os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'val_score.csv'), index=False)
     logger.info(val_df.to_markdown())
 
     # submit

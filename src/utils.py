@@ -12,9 +12,7 @@ from logging import getLogger, INFO, FileHandler,  Formatter,  StreamHandler
 # config
 # --------------------------------
 ERA_COL = "era"
-TARGET_COL = "target_nomi"
-DATA_TYPE_COL = "data_type"
-EXAMPLE_PREDS_COL = "example_preds"
+TARGET_COL = "target"
 
 # --------------------------------
 # logging
@@ -42,7 +40,9 @@ def upload(napi, sub_df, upload_type='diagnostics', slot_name='XXX', logger=None
     slot_id = model_slots[slot_name.lower()]
     
     # format submission dataframe
-    sdf = sub_df.index.to_frame()
+    # sdf = sub_df.index.to_frame()
+    sdf = pd.DataFrame()
+    sdf['id'] = sub_df['id'].values
     sdf['data_type'] = sub_df['data_type'].values
     sdf['prediction'] = sub_df['prediction'].values
     

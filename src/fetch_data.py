@@ -30,12 +30,16 @@ def cast_features2int(df):
 
 def main():
     # fetch train data
-    train = pd.read_csv(pathlib.Path(TRAIN_PATH)).pipe(get_int).pipe(cast_features2int)
+    train = pd.read_csv(TRAIN_PATH).pipe(cast_features2int)
+    train['era'] = train['era'].apply(get_int)
 
     # fetch tournament data
-    tournament = pd.read_csv(pathlib.Path(TOURNAMENT_PATH)).pipe(get_int).pipe(cast_features2int)
+    tournament = pd.read_csv(TOURNAMENT_PATH).pipe(cast_features2int)
+    tournament['era'] = tournament['era'].apply(get_int)
 
     # save
+    cwd = os.getcwd()
+    SAVE_PATH = f'{cwd}/input'
     train.to_parquet(pathlib.Path(f'{SAVE_PATH}/train.parquet'))
     tournament.to_parquet(pathlib.Path(f'{SAVE_PATH}/tournament.parquet'))
     print(f'Train & Tournament data stored in the {SAVE_PATH}!')
