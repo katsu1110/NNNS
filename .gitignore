@@ -13,6 +13,9 @@ catboost_info/
 EDA.ipynb
 .history/
 history/
+.vscode/
+wandb/
+.wandb/
 
 General
 *.DS_Store

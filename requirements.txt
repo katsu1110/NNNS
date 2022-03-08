@@ -1,0 +1,14 @@
+discordwebhook==1.0.2
+pandas
+numpy
+scipy
+tabulate
+python-dotenv
+scikit-learn
+xgboost==1.5.2
+lightgbm==3.3.1
+joblib
+numerapi==2.9.4
+pyarrow
+fastparquet
+wandb
