@@ -17,6 +17,8 @@ from sklearn import preprocessing, metrics
 # import tensorflow_addons as tfa
 # import kerastuner as kt # keras tuner!
 import xgboost as xgb
+
+import wandb
 import numerapi
 
 from utils import init_logger, upload, validation_metrics
@@ -56,10 +58,9 @@ def get_features_target(df):
 
 # ================== EDIT START ================== 
 
-def model_dispatcher():
-    """Define your model
+def params_dispatcher():
+    """Define hyperparameters
     """
-    # define model
     params = {
         'colsample_bytree': 0.1,
         'learning_rate': 0.01,
@@ -68,47 +69,45 @@ def model_dispatcher():
         'n_estimators': 2000,
         # 'tree_method': 'gpu_hist' # Let's use GPU for a faster experiment
     }
-    model = xgb.XGBRegressor(**params)
-    return model
+    return params
 
-def fit_model(model, 
-        train,
-        tournament=None, 
-        features=['feature_dexterity4', 'feature_charisma76'], 
-        target='target'
-        ):
+def fit_model(
+    params, 
+    train,
+    tournament, 
+    features=['feature_dexterity4', 'feature_charisma76'], 
+    target='target',
+    pred_col='prediction'
+    ):
     """Write model fitting logic
     """
     # create a train dataset
     train_df = train[features + [target]].dropna(subset=[target])
     train_set = {'X': train_df[features], 'y': train_df[target].values}
+    train_set = xgb.DMatrix(train_set['X'], label=train_set['y'])
+    
+    # create a valid dataset
+    valid_df = tournament.query('data_type == "validation"')[features + [target]].dropna(subset=[target])
+    valid_set = {'X': valid_df[features], 'y': valid_df[target].values}
+    valid_set = xgb.DMatrix(valid_set['X'], label=valid_set['y'])
 
-    # training
-    if tournament is None: # no validation
-        # fit
-        model.fit(train_set['X'], train_set['y'], verbose=100)
-    else:
-        # create a valid dataset
-        valid_df = tournament.query('data_type == "validation"')[features + [target]].dropna(subset=[target])
-        valid_set = {'X': valid_df[features], 'y': valid_df[target].values}
+    # fit
+    model = xgb.train(
+        params, 
+        train_set,
+        num_boost_round=params['n_estimators'],
+        evals=[(train_set, 'train'), (valid_set, 'eval')],
+        callbacks=[wandb.xgboost.wandb_callback()],
+        early_stopping_rounds=100, 
+        )
 
-        # fit
-        model.fit(
-            train_set['X'], train_set['y'], 
-            eval_set=[(valid_set['X'], valid_set['y'])],
-            early_stopping_rounds=10, 
-            verbose=100
-            )
+    # inference
+    tournament[pred_col] = np.nan
+    tournament.loc[tournament['data_type'] == 'validation', pred_col] = model.predict(valid_set)
     
     # save model
     save_file_path = os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'xgb_model.pkl')
     joblib.dump(model, save_file_path)
-    return model
-
-def inference(model, tournament, features, pred_col='prediction'):
-    """Write model inference logic
-    """
-    tournament[pred_col] = model.predict(tournament[features])
     return tournament
 
 # ================== EDIT END ==================
@@ -117,6 +116,9 @@ def inference(model, tournament, features, pred_col='prediction'):
 # run
 # ----------------------------
 def main():
+    # --------------------------------------
+    # initialize
+    # --------------------------------------
     # make output folder
     os.makedirs(os.path.join(OUTPUT_PATH, EXPERIMENT_NAME), exist_ok=True)
     
@@ -127,6 +129,15 @@ def main():
         )
     logger.info('Start Logging...')
 
+    # --------------------------------------
+    # modeling
+    # --------------------------------------
+    # define hyperparameters
+    params = params_dispatcher()
+
+    # init wandb
+    run = wandb.init(project=EXPERIMENT_NAME, entity='katsu1110', config=params, reinit=True)
+    
     # get data
     train, tournament = read_data(INPUT_PATH)
     logger.info('Data read!')
@@ -135,24 +146,22 @@ def main():
     features, target = get_features_target(train)
     logger.info('target: {}'.format(target))
     logger.info('{} features: {}'.format(len(features), features))
-    
-    # create model
-    model = model_dispatcher()
 
-    # fit model
-    model = fit_model(
-        model, 
+    # fit model and perform inference
+    tournament = fit_model(
+        params,
         train,
         tournament, 
         features, 
-        target
+        target,
+        pred_col='prediction'
         )
 
-    # inference
-    tournament = inference(model, tournament, features)
-
+    # --------------------------------------
+    # validation scoring
+    # --------------------------------------
     # compute validation score
-    val_df = validation_metrics(
+    val_df, corr_per_era = validation_metrics(
         tournament.query('data_type == "validation"'),
         pred_cols=tournament.columns[tournament.columns.str.startswith('pred')].values.tolist(),
         example_col=EXAMPLE_COL,
@@ -163,12 +172,30 @@ def main():
     val_df.to_csv(os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'val_score.csv'), index=False)
     logger.info(val_df.to_markdown())
 
-    # submit
-    napi = numerapi.NumerAPI(NUMERAI_KEY, NUMERAI_SECRET)
-    upload(napi, tournament, upload_type='diagnostics', slot_name=SLOT_NAME, logger=logger)
+    # --------------------------------------
+    # upload to wandb
+    # --------------------------------------
+    # validation metrics
+    table = wandb.Table(data=val_df)
+    wandb.log({'Validation metrics': table})    
+    
+    # correlation per era
+    for pred_col, corr in corr_per_era.items():    
+        data = [[label, val] for (label, val) in zip(corr.values[:, 0], corr.values[:, 1])]
+        table = wandb.Table(data=data, columns=["era", "corr"])
+        wandb.log(
+            {f"Corr per era ({target})" : wandb.plot.bar(table, "era", "corr", title=f"Corr per era ({pred_col})")}
+            )
+    run.finish()
 
-    # move the submitted file to the experiment folder
-    shutil.move('./prediction.csv', os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'prediction.csv'))
+    # --------------------------------------
+    # submit
+    # --------------------------------------
+    # napi = numerapi.NumerAPI(NUMERAI_KEY, NUMERAI_SECRET)
+    # upload(napi, tournament, upload_type='diagnostics', slot_name=SLOT_NAME, logger=logger)
+
+    # # move the submitted file to the experiment folder
+    # shutil.move('./prediction.csv', os.path.join(OUTPUT_PATH, EXPERIMENT_NAME, 'prediction.csv'))
     logger.info('Prediction is saved...ALL DONE!')
 
 if __name__ == '__main__':

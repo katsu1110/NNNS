@@ -31,8 +31,10 @@ def init_logger(log_file='train.log'):
 # --------------------------------
 # upload
 # --------------------------------
-def upload(napi, sub_df, upload_type='diagnostics', slot_name='XXX', logger=None):
-    """Upload prediction to Numerai    
+def upload(napi, sub_df, upload_type='diagnostics', slot_name='XXX', version=2, logger=None):
+    """Upload prediction to Numerai
+    
+    NOTE THAT this function works only for the "super massive data"
     """
     
     # fetch model slot id
@@ -40,9 +42,7 @@ def upload(napi, sub_df, upload_type='diagnostics', slot_name='XXX', logger=None
     slot_id = model_slots[slot_name.lower()]
     
     # format submission dataframe
-    # sdf = sub_df.index.to_frame()
-    sdf = pd.DataFrame()
-    sdf['id'] = sub_df['id'].values
+    sdf = sub_df.index.to_frame()
     sdf['data_type'] = sub_df['data_type'].values
     sdf['prediction'] = sub_df['prediction'].values
     
@@ -64,7 +64,7 @@ def upload(napi, sub_df, upload_type='diagnostics', slot_name='XXX', logger=None
         in_data = ['test', 'live']
         sdf.query('data_type in @in_data')[['id', 'prediction']].to_csv(f'./prediction.csv', index=False)
         try:
-            napi.upload_predictions('./prediction.csv', model_id=slot_id, version=2)
+            napi.upload_predictions('./prediction.csv', model_id=slot_id, version=version)
             if logger is None:
                 print(f'{slot_name} submitted for predictions!')
             else:
@@ -165,11 +165,13 @@ def fast_score_by_date(df, columns, target, tb=None, era_col="era"):
 
 def validation_metrics(validation_data, pred_cols, example_col=None, fast_mode=False):
     validation_stats = pd.DataFrame()
+    corr_per_era = {}
     feature_cols = [c for c in validation_data if c.startswith("feature_")]
     for pred_col in pred_cols:
         # Check the per-era correlations on the validation set (out of sample)
         validation_correlations = validation_data.groupby(ERA_COL).apply(
             lambda d: unif(d[pred_col]).corr(d[TARGET_COL]))
+        corr_per_era[pred_col] = validation_correlations.reset_index()
 
         mean = validation_correlations.mean()
         std = validation_correlations.std(ddof=0)
@@ -250,4 +252,4 @@ def validation_metrics(validation_data, pred_cols, example_col=None, fast_mode=F
             validation_stats.loc["corr_with_example_preds", pred_col] = corr_with_example_preds
 
     # .transpose so that stats are columns and the model_name is the row
-    return validation_stats.transpose()
+    return validation_stats.transpose(), corr_per_era

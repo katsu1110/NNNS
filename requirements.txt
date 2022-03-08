@@ -11,3 +11,4 @@ joblib
 numerapi==2.9.4
 pyarrow
 fastparquet
+wandb
