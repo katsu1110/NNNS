@@ -27,17 +27,17 @@ from utils import init_logger, upload, validation_metrics
 # config
 # ----------------------------
 EXPERIMENT_NAME = 'XGB_baseline'
-SLOT_NAME = 'KATSU_MINAMISAWAK'
 EXAMPLE_COL = None
 cwd = os.getcwd()
 INPUT_PATH = f'{cwd}/input'
 OUTPUT_PATH = f'{cwd}/output'
 
 # authentification
-from dotenv import load_dotenv
-load_dotenv(pathlib.Path(f'{cwd}/.env'))
-NUMERAI_KEY = os.getenv('NUMERAI_KEY')
-NUMERAI_SECRET = os.getenv('NUMERAI_SECRET')
+# from dotenv import load_dotenv
+# load_dotenv(pathlib.Path(f'{cwd}/.env'))
+# NUMERAI_KEY = os.getenv('NUMERAI_KEY')
+# NUMERAI_SECRET = os.getenv('NUMERAI_SECRET')
+# SLOT_NAME = 'KATSU_MINAMISAWAK'
 
 # ----------------------------
 # modeling
