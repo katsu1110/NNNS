@@ -72,14 +72,30 @@ def params_dispatcher():
     return params
 
 def fit_model(
-    params, 
-    train,
-    tournament, 
-    features=['feature_dexterity4', 'feature_charisma76'], 
-    target='target',
-    pred_col='prediction'
+    params: Dict, 
+    train: pd.DataFrame,
+    tournament: pd.DataFrame, 
+    features: List=['feature_dexterity4', 'feature_charisma76'], 
+    target: str='target',
+    pred_col: str='prediction'
     ):
-    """Write model fitting logic
+    """Write your modeling logic!
+
+    1. create dataset for modeling
+    2. fit model
+    3. perform model inference
+    4. save model
+
+    Args:
+        params (dict): model hyperparameters, defined in 'params_dispatcher'.
+        train (pd.DataFrame): Numerai Train data.
+        tournament (pd.DataFrame): Numerai Tournament data.
+        features (list): list of numerai features to use.
+        target (str): name of target. Defaults to 'prediction'.
+        pred_col (str): name of to-be-added prediction column. Defaults to 'prediction'.
+
+    Returns:
+        tournament: tournament dataframe with 'pred_col' column added.
     """
     # create a train dataset
     train_df = train[features + [target]].dropna(subset=[target])
