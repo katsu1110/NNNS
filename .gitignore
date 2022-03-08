@@ -1,9 +1,4 @@
-inputs/
-input/
-output/
-private_src/
 old/
-/old/
 *.DS_Store
 *.ipynb_checkpoints
 __pycache__/
